@@ -65,8 +65,8 @@ shinyServer(function(input, output) {
   })
   
   reactive_calculate_words <- reactive({
-    req(input$coverage)
-    calculate_words(reactive_parse_book()[[1]], input$coverage[1], input$coverage[2])
+      req(input$coverage)
+      calculate_words(reactive_parse_book()[[1]], input$coverage[1], input$coverage[2])
   })
   
   #plot
@@ -93,20 +93,37 @@ shinyServer(function(input, output) {
     )
   })
   
+  #all books in this category
+  output$booksPlot <- renderPlotly({
+    ggplotly(
+      ggplot(data=datasetInput(),
+             aes(x=flesch_value, y=average_goodreads_rating)) +
+             xlab("Flesch value") +
+             ylab("Average Goodreads rating") +
+             geom_point() +
+             geom_smooth(method = "auto") +
+             theme_few()
+    )
+  })
+  
   #nngrams
   
   output$nngram_type <- renderUI({
     selectInput("nngramType", 
               label=p("Choose your ngram type:"), 
               choices = c("singlegram", "bigram", "trigram"),
-              selected = "bigram")
+              selected = NULL)
   })
   
   nngrams <- reactive({
-    if(input$nngramType == "bigram") {
+    req(input$nngramType)
+    if(input$nngramType == "singlegram") {
+      return(create_1gram_df(reactive_seek_and_get_book()[[1]]))
+    }
+    else if(input$nngramType == "bigram") {
       return(create_2gram_df(reactive_seek_and_get_book()[[1]]))
     }
-    if(input$nngramType == "trigram") {
+    else if(input$nngramType == "trigram") {
       return(create_3gram_df(reactive_seek_and_get_book()[[1]]))
     }
   })

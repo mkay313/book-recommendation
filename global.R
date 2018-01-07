@@ -1,9 +1,10 @@
 library(tm) #text manipulation
 library(gutenbergr) #project gutenberg api
-library(tidytext)
-library(tidyverse)
+library(tidytext) #text manipulation
+library(tidyverse) #piping, filtering, etc
+library(memoise) #caching
 
-FILE_LOCATION="books_cleanup.csv"
+FILE_LOCATION="books_cleanup - books_cleanup.csv"
 
 read_file <- function() {
   book_list <- read.csv(FILE_LOCATION)
@@ -12,9 +13,15 @@ read_file <- function() {
  
 get_level <- function(df, chosen_level) {
   
-  df <- df %>%
-    filter(level == chosen_level) %>%
-    subset(select = -c(gutenberg_id, gutenberg_author_id, level, flesch_grade))
+  if (chosen_level == "All") {
+    df <- df %>%
+      subset(select = -c(gutenberg_id, gutenberg_author_id, level, flesch_grade))
+  }
+  else {
+    df <- df %>%
+      filter(level == chosen_level) %>%
+      subset(select = -c(gutenberg_id, gutenberg_author_id, level, flesch_grade))
+  }
   df$flesch_value <- format(df$flesch_value, digits = 4)
   df$average_goodreads_rating <- format(df$average_goodreads_rating, digits = 3)
   return(df)
@@ -30,9 +37,6 @@ seek_and_get_book <- function(book_title) {
   #saving the book data
   title <- book$title
   author <- book$author
-  # author <- book$author %>%
-  #   strsplit(split = ", ")
-  # author <- paste(author[[1]][2], author[[1]][1], sep = " ")
   book_id <- book$gutenberg_id
   book_text <- gutenberg_download(book_id)$text
   
@@ -49,7 +53,7 @@ seek_and_get_book <- function(book_title) {
   return(list(text, info))
 }  
 
-parse_book <- function(text, author, book_id, title) {
+parse_book <- memoise(function(text, author, book_id, title) {
   
   #saving the number of words
   total_number_of_words <- length(text)
@@ -98,7 +102,7 @@ parse_book <- function(text, author, book_id, title) {
     total_unique_recurring_df,
     stats
   ))
-}
+})
 
 calculate_words <- function(a_data_frame, a_start_page, an_end_page) {
   
@@ -135,6 +139,18 @@ calculate_words <- function(a_data_frame, a_start_page, an_end_page) {
 }
 
 ##wordcloud
+
+create_1gram_df <- function(book_text_vector) {
+  book_text_df <- data.frame(text=book_text_vector)
+  book_text_df <- book_text_df %>%
+    filter(text!="") #getting rid of the extra spaces
+  book_1grams <- book_text_df %>%
+    count(text, sort = TRUE)
+  book_1grams_clean <- book_1grams %>%
+    filter(!text %in% stop_words$word)
+  colnames(book_1grams_clean) <- c("nngram", "n")
+  return(book_1grams_clean)
+}
 
 create_2gram_df <- function(book_text_vector) {
   book_text_df <- data.frame(text=book_text_vector)
