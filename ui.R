@@ -17,22 +17,24 @@ shinyUI(fluidPage(
       uiOutput("catalogue_books"),
       actionButton("show_books", label = "Show me the stats!"),
       textOutput("sumtext")
-
+      
     ),
     
     # Tabsets
     mainPanel(
       tabsetPanel(
         tabPanel("Book info",
-          dataTableOutput("bookTable")
+                 dataTableOutput("bookTable")
         ),
         tabPanel("New words plot",
-          plotlyOutput("distPlot"),
-          textOutput("textStats"),
-          uiOutput("coverage_slider")
+                 plotlyOutput("distPlot"),
+                 textOutput("textStats"),
+                 uiOutput("coverage_slider")
         ),
         tabPanel("Books on this level",
-          plotlyOutput("booksPlot")
+                 br(),
+                 p("These are all the books on this level. Best & easiest book in this category are in the upper right corner."),
+                 plotlyOutput("booksPlot")
         ),
         tabPanel("Word ngrams",
                  br(),
@@ -59,10 +61,10 @@ shinyUI(fluidPage(
                    Since they focus on the easily computable values (number of paragraphs, words and syllables, and their respective ratios)
                    they are obviously unreliable when used as the sole source of information in comparing e.g. the difficulty of books from different literary periods.
                    They miss out on several variables, such as relative vocabulary frequency, topic complexity, writing style, and more."),
-                   p("For instance, according to the readability scores only, the plays by William Shakespeare can be read by A1 (beginner) level readers.
+                 p("For instance, according to the readability scores only, the plays by William Shakespeare can be read by A1 (beginner) level readers.
                    Indeed, the language of Shakespeare is pretty transparent -- if you're from the 16th century, that is.")
-                 )
+        )
       )
     )
   )
-  ))
+))

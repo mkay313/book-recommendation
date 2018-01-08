@@ -10,7 +10,7 @@ read_file <- function() {
   book_list <- read.csv(FILE_LOCATION)
   return(book_list)
 }
- 
+
 get_level <- function(df, chosen_level) {
   
   if (chosen_level == "All") {

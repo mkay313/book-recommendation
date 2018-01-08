@@ -12,7 +12,7 @@ shinyServer(function(input, output) {
   datasetInput <- reactive({
     get_level(read_file(), input$reader_level)
   })
-
+  
   output$bookTable <- renderDataTable({
     datasetInput()
   })
@@ -65,8 +65,8 @@ shinyServer(function(input, output) {
   })
   
   reactive_calculate_words <- reactive({
-      req(input$coverage)
-      calculate_words(reactive_parse_book()[[1]], input$coverage[1], input$coverage[2])
+    req(input$coverage)
+    calculate_words(reactive_parse_book()[[1]], input$coverage[1], input$coverage[2])
   })
   
   #plot
@@ -98,22 +98,23 @@ shinyServer(function(input, output) {
     ggplotly(
       ggplot(data=datasetInput(),
              aes(x=flesch_value, y=average_goodreads_rating)) +
-             xlab("Flesch value") +
-             ylab("Average Goodreads rating") +
-             geom_point(aes(color=title)) +  
-             scale_x_discrete(breaks = round(seq(0, 100, by = 20),1)) +
-             scale_y_discrete(breaks = round(seq(0, 5, by = 0.5),1)) +
-             theme_few()
-    )
+        xlab("Flesch value") +
+        ylab("Average Goodreads rating") +
+        geom_point(aes(color=title)) +  
+        scale_x_discrete(breaks = round(seq(0, 100, by = 20),1)) +
+        scale_y_discrete(breaks = round(seq(0, 5, by = 0.5),1)) +
+        theme_few()
+    ) %>%
+      layout(showlegend = FALSE)
   })
   
   #nngrams
   
   output$nngram_type <- renderUI({
     selectInput("nngramType", 
-              label=p("Choose your ngram type:"), 
-              choices = c("singlegram", "bigram", "trigram"),
-              selected = NULL)
+                label=p("Choose your ngram type:"), 
+                choices = c("singlegram", "bigram", "trigram"),
+                selected = NULL)
   })
   
   nngrams <- reactive({
