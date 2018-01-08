@@ -4,7 +4,7 @@ library(tidytext) #text manipulation
 library(tidyverse) #piping, filtering, etc
 library(memoise) #caching
 
-FILE_LOCATION="books_cleanup - books_cleanup.csv"
+FILE_LOCATION="data/book_list.csv"
 
 read_file <- function() {
   book_list <- read.csv(FILE_LOCATION)

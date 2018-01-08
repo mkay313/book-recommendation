@@ -6,7 +6,7 @@ shinyUI(fluidPage(
   useShinyjs(),
   
   # Application title
-  titlePanel("Book recommendation by readability"),
+  headerPanel("Book recommendation by readability"),
   
   # Sidebar with the upload panel
   sidebarLayout(
@@ -53,10 +53,10 @@ shinyUI(fluidPage(
                  p("The books have been pre-processed to get a list of 480 books from top 100 PG authors. 
                    Using the treetagger software and several R packages, I calculated the ", a(href="https://en.wikipedia.org/wiki/Flesch%E2%80%93Kincaid_readability_tests", "Flesch-Kincaid readability scores, "),
                    "as they can be ",a(href="https://linguapress.com/teachers/flesch-kincaid.htm","translated into EFL proficiency levels pretty easily."), 
-                   "However, all the graphs are rendered on the go. It is possible for the user to feed the graphs their own data, as long the file contains the mandatory information."),
+                   "However, all the graphs are rendered on the go. It is possible for the user to feed the graphs their own data, as long as the file contains the mandatory information."),
                  h3("Limitations"),
                  p("Readability scores themselves are not a perfect book difficulty delimiter.
-                   Since they focus on the easily measurable values (number of paragraphs, words and syllables, and their respective ratios)
+                   Since they focus on the easily computable values (number of paragraphs, words and syllables, and their respective ratios)
                    they are obviously unreliable when used as the sole source of information in comparing e.g. the difficulty of books from different literary periods.
                    They miss out on several variables, such as relative vocabulary frequency, topic complexity, writing style, and more."),
                    p("For instance, according to the readability scores only, the plays by William Shakespeare can be read by A1 (beginner) level readers.

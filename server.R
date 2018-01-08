@@ -100,8 +100,9 @@ shinyServer(function(input, output) {
              aes(x=flesch_value, y=average_goodreads_rating)) +
              xlab("Flesch value") +
              ylab("Average Goodreads rating") +
-             geom_point() +
-             geom_smooth(method = "auto") +
+             geom_point(aes(color=title)) +  
+             scale_x_discrete(breaks = round(seq(0, 100, by = 20),1)) +
+             scale_y_discrete(breaks = round(seq(0, 5, by = 0.5),1)) +
              theme_few()
     )
   })
