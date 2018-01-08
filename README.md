@@ -1,9 +1,9 @@
 # book-recommendation
 
 ### How to run
-install the required packages
-import into R
-run app
+-install the required packages
+-import into R
+-run app
 
 ### About the project
 Reading books in a foreign language is one of the most popular methods of learning. This site aims to help leaners find the books that fit their English level. Partially inspired by [this article](https://blog.vocapouch.com/do-20-pages-of-a-book-gives-you-90-of-its-words-795a405afe70), I decided to check the complexity of some of the books provided by the Project Gutenberg website, since it serves the books that have passed into the public domain and can be freely used by all users. 
