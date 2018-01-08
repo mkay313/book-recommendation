@@ -32,7 +32,6 @@ shinyServer(function(input, output) {
   
   #plot tab  
   reactive_parse_book <- reactive({
-    req(input$show_books)
     bookTitle <- input$chosenBook
     isolate({
       withProgress({

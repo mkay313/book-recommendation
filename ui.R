@@ -14,10 +14,7 @@ shinyUI(fluidPage(
       selectInput("reader_level", label = p("Choose your English level"), 
                   choices = c("A1", "A2", "B1", "B2", "C1", "C2", "All"), 
                   selected = "A1"),
-      uiOutput("catalogue_books"),
-      actionButton("show_books", label = "Show me the stats!"),
-      textOutput("sumtext")
-      
+      uiOutput("catalogue_books")
     ),
     
     # Tabsets
