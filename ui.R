@@ -11,37 +11,41 @@ shinyUI(fluidPage(
   # Sidebar with the upload panel
   sidebarLayout(
     sidebarPanel(
-      selectInput("reader_level", label = p("Choose your English level"), 
+      selectInput("reader.level", 
+                  label = p("Choose your English level"), 
                   choices = c("A1", "A2", "B1", "B2", "C1", "C2", "All"), 
                   selected = "A1"),
-      uiOutput("catalogue_books")
+      uiOutput("catalogue.books")
     ),
     
     # Tabsets
     mainPanel(
       tabsetPanel(
         tabPanel("Book info",
-                 dataTableOutput("bookTable")
+                 dataTableOutput("book.table")
         ),
         tabPanel("New words plot",
-                 plotlyOutput("distPlot"),
-                 textOutput("textStats"),
-                 uiOutput("coverage_slider")
+                 plotlyOutput("uniques.plot"),
+                 textOutput("text.stats"),
+                 uiOutput("coverage.slider")
         ),
         tabPanel("Books on this level",
                  br(),
                  p("These are all the books on this level. Best & easiest book in this category are in the upper right corner."),
-                 plotlyOutput("booksPlot")
+                 plotlyOutput("books.plot")
         ),
         tabPanel("Word ngrams",
                  br(),
                  p("Word ngrams give you a hint on what's the book about by providing you with the most frequent words and word clusters."),
-                 uiOutput("nngram_type"),
-                 plotOutput("nngram_wordcloud"),
+                 uiOutput("nngram.type"),
+                 plotOutput("nngram.wordcloud"),
                  hr(),
-                 sliderInput("max_slider", label=p("Maximum number of ngrams:"),
-                             min = 1, max = 40, value = 10),
-                 uiOutput("freq_slider")
+                 sliderInput("max.slider", 
+                             label=p("Maximum number of ngrams:"),
+                             min = 1, 
+                             max = 40, 
+                             value = 10),
+                 uiOutput("freq.slider")
         ),
         tabPanel("About",
                  h3("About the project"),

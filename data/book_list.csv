@@ -1,4 +1,4 @@
-gutenberg_id,title,author,gutenberg_author_id,gutenberg_bookshelf,flesch_value,flesch_grade,level,average_goodreads_rating
+gutenberg.id,title,author,gutenberg.author.id,gutenberg.bookshelf,flesch.value,flesch.grade,level,average.goodreads.rating
 17621,One Day More: A Play In One Act,"Conrad, Joseph",125,One Act Plays,90.41836266,5,A1,2.9
 28554,Beyond Lies the Wub,"Dick, Philip K.",33399,Science Fiction,90.43119116,5,A1,3.81
 28644,Beyond the Door,"Dick, Philip K.",33399,Science Fiction,93.40123534,5,A1,3.06

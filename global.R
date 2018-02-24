@@ -1,184 +1,162 @@
-library(tm) #text manipulation
-library(gutenbergr) #project gutenberg api
-library(tidytext) #text manipulation
-library(tidyverse) #piping, filtering, etc
-library(memoise) #caching
+library(tm)          #text manipulation
+library(gutenbergr)  #project gutenberg api
+library(tidytext)    #text manipulation
+library(tidyverse)   #piping, filtering, etc
+library(memoise)     #caching
 
-FILE_LOCATION="data/book_list.csv"
+kFileLocation <- "data/book_list.csv"
 
-read_file <- function() {
-  book_list <- read.csv(FILE_LOCATION)
-  return(book_list)
+# Reads the data
+ReadData <- function() {
+  book.list <- read.csv(kFileLocation)
+  return(book.list)
 }
 
-get_level <- function(df, chosen_level) {
-  
-  if (chosen_level == "All") {
+# Returns the df from the data corresponding to the user's level
+GetUserLevel <- function(df, chosen.level) {
+  if (chosen.level == "All") {
     df <- df %>%
-      subset(select = -c(gutenberg_id, gutenberg_author_id, level, flesch_grade))
-  }
-  else {
+      subset(select = -c(gutenberg.id, gutenberg.author.id, level, flesch.grade))
+  } else {
     df <- df %>%
-      filter(level == chosen_level) %>%
-      subset(select = -c(gutenberg_id, gutenberg_author_id, level, flesch_grade))
+      filter(level == chosen.level) %>%
+      subset(select = -c(gutenberg.id, gutenberg.author.id, level, flesch.grade))
   }
-  df$flesch_value <- format(df$flesch_value, digits = 4)
-  df$average_goodreads_rating <- format(df$average_goodreads_rating, digits = 3)
+  df$flesch.value <- format(df$flesch.value, digits = 4)
+  df$average.goodreads.rating <- format(df$average.goodreads.rating, digits = 3)
   return(df)
 }
 
-seek_and_get_book <- function(book_title) {
-  
-  books <- read_file()
-  
+# Returns the book text and information about it
+GetBook <- function(book.title) {
+  books <- ReadFile()
   book <- books %>%
-    filter(title == book_title)
+    filter(title == book.title)
   
-  #saving the book data
+  # Saves the book data
   title <- book$title
   author <- book$author
-  book_id <- book$gutenberg_id
-  book_text <- gutenberg_download(book_id)$text
+  book.id <- book$gutenberg.id
+  book.text <- gutenberg_download(book.id)$text
   
-  #reading and formatting the text
-  text <- strsplit(paste(book_text, collapse = " "), ' ')[[1]]
+  # Reads and formats the text
+  text <- strsplit(paste(book.text, collapse = " "), ' ')[[1]]
   text <- text %>%
     removePunctuation(preserve_intra_word_dashes = TRUE) %>%
     removeNumbers() %>%
     stripWhitespace() %>%
     tolower()
   
-  info <- data.frame(title = title, author = author, book_id = book_id)
+  info <- data.frame(title = title, author = author, book.id = book.id)
   
   return(list(text, info))
 }  
 
-parse_book <- memoise(function(text, author, book_id, title) {
+ParseBook <- memoise(function(text, author, book.id, title) {
   
-  #saving the number of words
-  total_number_of_words <- length(text)
+  # Saves the number of words
+  total.number.of.words <- length(text)
   
-  #saving the number of pages
-  total_number_of_pages <- ceiling(total_number_of_words / 250)
+  # Saves the number of pages
+  total.number.of.pages <- ceiling(total.number.of.words / 250)
   
-  #save the number of different words
-  number_of_different_words <- nrow(data.frame(table(text)))
+  # Saves the number of different words
+  number.of.different.words <- nrow(data.frame(table(text)))
   
-  total_unique_recurring_df <- data.frame()
-  for (i in 1:total_number_of_pages) {
-    #parse an increasing number of pages and put those words into a list
+  total.unique.recurring.df <- data.frame()
+  
+  #TODO: improve the speed by replacing rbind with sth faster
+  for (i in 1:total.number.of.pages) {
     words <- table(text[1:(i * 250)])
-    
-    #change the table into a data frame and add column names
-    temporary_df <- data.frame(words)
-    colnames(temporary_df)[1] <- "Words"
-    colnames(temporary_df)[2] <- "Freq"
-    
-    #filter out empty spaces
-    temporary_df <- filter(temporary_df, Words != " ")
-    
-    #filter out the words that occur only once in a given range from those recurring
-    unique_temporary <- nrow(filter(temporary_df, Freq == 1))
-    recurring_temporary <- nrow(filter(temporary_df, Freq > 1))
-    
-    #create a temporary data frame with results 
-    temporary_df <-
-      data.frame(uniques = unique_temporary, recurring = recurring_temporary)
-    
-    #attach it to the main frame
-    total_unique_recurring_df <-
-      rbind(total_unique_recurring_df, temporary_df)
+    temporary.df <- data.frame(words)
+    colnames(temporary.df)[1] <- "Words"
+    colnames(temporary.df)[2] <- "Freq"
+    temporary.df <- filter(temporary.df, Words != " ")  # Filters out empty spaces
+    unique.temporary <- nrow(filter(temporary.df, Freq == 1)) # Filters out the words that occur only once 
+    recurring.temporary <- nrow(filter(temporary.df, Freq > 1)) #Filters out the words that reoccur
+    temporary.df <- data.frame(uniques = unique.temporary, 
+                               recurring = recurring.temporary)
+    total.unique.recurring.df <- rbind(total.unique.recurring.df, temporary.df)
   }
   
-  stats <-
-    data.frame(title = title,
-               author = author,
-               pages = total_number_of_pages,
-               words = total_number_of_words,
-               different_words = number_of_different_words,
-               unique_words = total_unique_recurring_df$uniques[total_number_of_pages])
+  stats <- data.frame(title = title,
+                      author = author,
+                      pages = total.number.of.pages,
+                      words = total.number.of.words,
+                      different.words = number.of.different.words,
+                      unique.words = total.unique.recurring.df$uniques[total.number.of.pages])
   
   return(list(
-    total_unique_recurring_df,
+    total.unique.recurring.df,
     stats
   ))
 })
 
-calculate_words <- function(a_data_frame, a_start_page, an_end_page) {
+CalculateWords <- function(a.data.frame, a.start.page, an.end.page) {
+  # Only grabs the part of df we need to save as a graph
+  a.data.frame <- a.data.frame[a.start.page:an.end.page,]
+  number.of.pages <- an.end.page - a.start.page + 1
   
-  #only grab the part of df we need to seve as a graph
-  a_data_frame <- a_data_frame[a_start_page:an_end_page,]
-  
-  number_of_pages <- an_end_page - a_start_page + 1
-  
-  #since we've only counted the total number of unique words in a book,
-  #now we calculate how the number of unique words changes across the book
-  uniques <-
-    vector(mode = "numeric", length = number_of_pages)
-  for (i in 1:(number_of_pages - 1)) {
-    uniques[i] <- a_data_frame$uniques[i + 1] - a_data_frame$uniques[i]
+  # Calculates how the number of unique words changes across the book
+  uniques <- vector(mode = "numeric", 
+                    length = number.of.pages)
+  for (i in 1:(number.of.pages - 1)) {
+    uniques[i] <- (a.data.frame$uniques[i + 1] - a.data.frame$uniques[i])
   }
   
-  #lets do the same for the recurring words
-  recurrences <-
-    vector(mode = "numeric", length = number_of_pages)
-  for (i in 1:(number_of_pages - 1)) {
-    recurrences[i] <-
-      a_data_frame$recurring[i + 1] - a_data_frame$recurring[i]
+  # Calculates how the number of recurring words changes across the book
+  recurrences <- vector(mode = "numeric", 
+                        length = number.of.pages)
+  for (i in 1:(number.of.pages - 1)) {
+    recurrences[i] <- (a.data.frame$recurring[i + 1] - a.data.frame$recurring[i])
   }
+
+  plot.df <- data.frame(Pages = a.start.page:(an.end.page),
+                        Uniques = uniques,
+                        Recurrences = recurrences)
   
-  #lets put that data into one data frame
-  plot_df <-
-    data.frame(
-      Pages = a_start_page:(an_end_page),
-      Uniques = uniques,
-      Recurrences = recurrences
-    )
-  
-  return(plot_df)
+  return(plot.df)
 }
 
-##wordcloud
-
-create_1gram_df <- function(book_text_vector) {
-  book_text_df <- data.frame(text=book_text_vector)
-  book_text_df <- book_text_df %>%
-    filter(text!="") #getting rid of the extra spaces
-  book_1grams <- book_text_df %>%
+Create1Gram <- function(book.text.vector) {
+  book.text.df <- data.frame(text = book.text.vector)
+  book.text.df <- book.text.df %>%
+    filter(text != "") # Gets rid of the extra spaces
+  book.1grams <- book.text.df %>%
     count(text, sort = TRUE)
-  book_1grams_clean <- book_1grams %>%
+  book.1grams.clean <- book.1grams %>%
     filter(!text %in% stop_words$word)
-  colnames(book_1grams_clean) <- c("nngram", "n")
-  return(book_1grams_clean)
+  colnames(book.1grams.clean) <- c("nngram", "n")
+  return(book.1grams.clean)
 }
 
-create_2gram_df <- function(book_text_vector) {
-  book_text_df <- data.frame(text=book_text_vector)
-  book_text_df <- book_text_df %>%
-    filter(text!="") #getting rid of the extra spaces
-  book_2grams <- book_text_df %>%
-    unnest_tokens(nngram, text, token="ngrams", n=2) %>%
-    separate(nngram, c("word1", "word2", sep=" ")) %>%
-    count(word1, word2, sort=TRUE)
-  book_2grams_clean <- book_2grams %>%
-    filter(!word1 %in% stop_words$word) %>% #removing stopwords
-    filter(!word2 %in% stop_words$word) %>% #removing stopwords
-    unite(nngram, word1, word2, sep=" ")
-  return(book_2grams_clean)
+Create2Gram <- function(book.text.vector) {
+  book.text.df <- data.frame(text = book.text.vector)
+  book.text.df <- book.text.df %>%
+    filter(text != "") # Gets rid of the extra spaces
+  book.2grams <- book.text.df %>%
+    unnest_tokens(nngram, text, token = "ngrams", n = 2) %>%
+    separate(nngram, c("word1", "word2", sep = " ")) %>%
+    count(word1, word2, sort = TRUE)
+  book.2grams.clean <- book.2grams %>%
+    filter(!word1 %in% stop_words$word) %>%  # Removes stopwords in word1
+    filter(!word2 %in% stop_words$word) %>%  # Removes stopwords in word2
+    unite(nngram, word1, word2, sep = " ")
+  return(book.2grams.clean)
 }
 
-create_3gram_df <- function(book_text_vector) {
-  book_text_df <- data.frame(text=book_text_vector)
-  book_text_df <- book_text_df %>%
-    filter(text!="") #getting rid of the extra spaces
-  book_3grams <- book_text_df %>%
-    unnest_tokens(nngram, text, token="ngrams", n=3) %>%
-    separate(nngram, c("word1", "word2","word3", sep=" ")) %>%
-    count(word1, word2,word3, sort=TRUE)
-  book_3grams_clean <- book_3grams %>%
-    filter(!word1 %in% stop_words$word) %>% #removing stopwords
-    filter(!word2 %in% stop_words$word) %>% #removing stopwords
-    filter(!word3 %in% stop_words$word) %>%
-    unite(nngram, word1, word2, word3, sep=" ")
-  return(book_3grams_clean)
+Create3Gram <- function(book.text.vector) {
+  book.text.df <- data.frame(text = book.text.vector)
+  book.text.df <- book.text.df %>%
+    filter(text != "") # Gets rid of the extra spaces
+  book.3grams <- book.text.df %>%
+    unnest_tokens(nngram, text, token = "ngrams", n = 3) %>%
+    separate(nngram, c("word1", "word2","word3", sep = " ")) %>%
+    count(word1, word2,word3, sort = TRUE)
+  book.3grams.clean <- book.3grams %>%
+    filter(!word1 %in% stop_words$word) %>%  # Removes stopwords in word1
+    filter(!word2 %in% stop_words$word) %>%  # Removes stopwords in word2
+    filter(!word3 %in% stop_words$word) %>%  # Removes stopwords in word3
+    unite(nngram, word1, word2, word3, sep = " ")
+  return(book.3grams.clean)
 }
