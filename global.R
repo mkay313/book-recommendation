@@ -29,6 +29,7 @@ GetUserLevel <- function(df, chosen.level) {
 
 # Returns the book text and information about it
 GetBook <- function(book.title) {
+  
   books <- ReadData()
   book <- books %>%
     filter(title == book.title)
@@ -54,29 +55,25 @@ GetBook <- function(book.title) {
 
 ParseBook <- memoise(function(text, author, book.id, title) {
   
-  # Saves the number of words
   total.number.of.words <- length(text)
-  
-  # Saves the number of pages
   total.number.of.pages <- ceiling(total.number.of.words / 250)
-  
-  # Saves the number of different words
   number.of.different.words <- nrow(data.frame(table(text)))
   
   total.unique.recurring.df <- data.frame()
-  
   #TODO: improve the speed by replacing rbind with sth faster
   for (i in 1:total.number.of.pages) {
     words <- table(text[1:(i * 250)])
     temporary.df <- data.frame(words)
     colnames(temporary.df)[1] <- "Words"
     colnames(temporary.df)[2] <- "Freq"
-    temporary.df <- filter(temporary.df, Words != " ")  # Filters out empty spaces
+    temporary.df <- temporary.df %>%
+      filter(Words != " ")  # Filters out empty spaces
     unique.temporary <- nrow(filter(temporary.df, Freq == 1)) # Filters out the words that occur only once 
     recurring.temporary <- nrow(filter(temporary.df, Freq > 1)) #Filters out the words that reoccur
     temporary.df <- data.frame(uniques = unique.temporary, 
                                recurring = recurring.temporary)
-    total.unique.recurring.df <- rbind(total.unique.recurring.df, temporary.df)
+    total.unique.recurring.list <- list(total.unique.recurring.df, temporary.df)
+    total.unique.recurring.df <- rbindlist(total.unique.recurring.list, use.names = TRUE)
   }
   
   stats <- data.frame(title = title,
@@ -94,7 +91,7 @@ ParseBook <- memoise(function(text, author, book.id, title) {
 
 CalculateWords <- function(a.data.frame, a.start.page, an.end.page) {
   # Only grabs the part of df we need to save as a graph
-  a.data.frame <- a.data.frame[a.start.page:an.end.page,]
+  a.data.frame <- a.data.frame[a.start.page:an.end.page, ]
   number.of.pages <- an.end.page - a.start.page + 1
   
   # Calculates how the number of unique words changes across the book
