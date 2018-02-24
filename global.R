@@ -29,7 +29,7 @@ GetUserLevel <- function(df, chosen.level) {
 
 # Returns the book text and information about it
 GetBook <- function(book.title) {
-  books <- ReadFile()
+  books <- ReadData()
   book <- books %>%
     filter(title == book.title)
   
