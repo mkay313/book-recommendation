@@ -3,6 +3,7 @@ library(gutenbergr)  #project gutenberg api
 library(tidytext)    #text manipulation
 library(tidyverse)   #piping, filtering, etc
 library(memoise)     #caching
+library(data.table)  #rbindlist
 
 kFileLocation <- "data/book_list.csv"
 

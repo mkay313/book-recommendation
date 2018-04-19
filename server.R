@@ -102,8 +102,10 @@ shinyServer(function(input, output) {
       ggplot(data = datasetInput(),
              aes(x= flesch.value, 
                  y = average.goodreads.rating)) +
-        xlab("Flesch value") +
-        ylab("Average Goodreads rating") +
+        labs(title = "A steadily descending trend line suggests the book gets easier with time, 
+             as there are fewer and fewer new words introduced",
+             x = "Flesch value",
+             y = "Average Goodreads rating") +
         geom_point(aes(color = title)) +  
         scale_x_discrete(breaks = round(seq(0, 100, by = 20), 1)) +
         scale_y_discrete(breaks = round(seq(0, 5, by = 0.5), 1)) +
