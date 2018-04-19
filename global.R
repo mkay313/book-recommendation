@@ -6,6 +6,7 @@ library(memoise)     #caching
 library(data.table)  #rbindlist
 
 kFileLocation <- "data/book_list.csv"
+kWordsPerPage <- 250
 
 # Reads the data
 ReadData <- function() {
@@ -42,7 +43,7 @@ GetBook <- function(book.title) {
   book.text <- gutenberg_download(book.id)$text
   
   # Reads and formats the text
-  text <- strsplit(paste(book.text, collapse = " "), ' ')[[1]]
+  text <- strsplit(paste(book.text, collapse = " "), split = ' ')[[1]]
   text <- text %>%
     removePunctuation(preserve_intra_word_dashes = TRUE) %>%
     removeNumbers() %>%
@@ -57,13 +58,13 @@ GetBook <- function(book.title) {
 ParseBook <- memoise(function(text, author, book.id, title) {
   
   total.number.of.words <- length(text)
-  total.number.of.pages <- ceiling(total.number.of.words / 250)
+  total.number.of.pages <- ceiling(total.number.of.words / kWordsPerPage)
   number.of.different.words <- nrow(data.frame(table(text)))
   
   total.unique.recurring.df <- data.frame()
   #TODO: improve the speed by replacing rbind with sth faster
   for (i in 1:total.number.of.pages) {
-    words <- table(text[1:(i * 250)])
+    words <- table(text[1:(i * kWordsPerPage)])
     temporary.df <- data.frame(words)
     colnames(temporary.df)[1] <- "Words"
     colnames(temporary.df)[2] <- "Freq"
