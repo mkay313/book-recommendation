@@ -32,7 +32,7 @@ shinyUI(fluidPage(
         tabPanel("Books on this level",
                  br(),
                  p("These are all the books on this level. Best & easiest books in this category are in the upper right corner."),
-                 plotlyOutput("books.plot")
+                 plotOutput("books.plot")
         ),
         tabPanel("Word ngrams",
                  br(),

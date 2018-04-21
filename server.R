@@ -97,21 +97,19 @@ shinyServer(function(input, output) {
   })
   
   #all books in this category
-  output$books.plot <- renderPlotly({
-    ggplotly(
+  #TODO work on the scales so the labels don't overlap!
+  output$books.plot <- renderPlot({
       ggplot(data = datasetInput(),
-             aes(x= flesch.value, 
-                 y = average.goodreads.rating)) +
-        labs(title = "A steadily descending trend line suggests the book gets easier with time, 
-             as there are fewer and fewer new words introduced",
+             aes(x = flesch.value, 
+                 y = average.goodreads.rating,
+                 label = title)) +
+      labs(title = "Best books are towards the top of the chart, with the easiest to the right and the hardest to the left",
              x = "Flesch value",
              y = "Average Goodreads rating") +
-        geom_point(aes(color = title)) +  
-        scale_x_discrete(breaks = round(seq(0, 100, by = 20), 1)) +
-        scale_y_discrete(breaks = round(seq(0, 5, by = 0.5), 1)) +
-        theme_few()
-    ) %>%
-    layout(showlegend = FALSE)
+      geom_text(aes(color = title), 
+                  show.legend = FALSE,
+                  check_overlap = TRUE) +
+      theme_few()
   })
   
   #nngrams
